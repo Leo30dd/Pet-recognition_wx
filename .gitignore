@@ -1,0 +1,10 @@
+# PyCharm specific files
+.idea/
+
+# Python specific files
+__pycache__/
+*.pyc
+venv/
+
+# Large model files (we don't want to upload a huge model to GitHub)
+*.h5
