@@ -1,0 +1,31 @@
+# ===================================================================
+# Gitignore for WeChat Miniprogram Project
+# ===================================================================
+
+# 1. Node.js dependency folder
+# 忽略通过 npm 或其他包管理器安装的所有依赖模块。
+# 这是一个巨大的文件夹，永远不应该被提交。
+# 别人应该通过 package.json 文件来重新安装依赖。
+/node_modules/
+/miniprogram_npm/
+
+# 2. User-specific configuration files
+# 忽略微信开发者工具生成的、包含个人设置（如 AppID）的私有配置文件。
+# 这可以防止你不小心把自己的 AppID 等敏感信息上传到公开的 GitHub 仓库。
+project.private.config.json
+
+# 3. Build and distribution folders
+# 忽略小程序构建或打包后生成的文件夹（如果未来有的话）。
+/dist/
+/build/
+
+# 4. Log and debug files
+# 忽略日志文件和 npm 的调试日志。
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 5. Operating System specific files
+# 忽略 macOS 系统自动生成的 .DS_Store 文件。
+.DS_Store
