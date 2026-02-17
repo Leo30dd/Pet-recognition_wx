@@ -39,6 +39,20 @@ train_generator = train_datagen.flow_from_directory(
     subset='training'
 )
 
+# 1. 获取类别字典，例如 {'cat': 0, 'dog': 1}
+indices_dict = train_generator.class_indices
+
+# 2. 转换成只有名字的列表，并确保顺序正确
+# 结果类似: ['cat', 'dog']
+class_names = list(indices_dict.keys())
+
+print(f"✅ 检测到类别映射: {indices_dict}")
+print(f"✅ 正在保存类别索引到 class_indices.txt...")
+
+# 3. 写入文件
+with open('class_indices.txt', 'w') as f:
+    f.write(str(class_names))
+
 validation_generator = train_datagen.flow_from_directory(
     train_dir,
     target_size=(img_width, img_height),
@@ -66,15 +80,15 @@ for layer in base_model.layers:
 model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
 # 5. 训练模型
-model.fit(
+history = model.fit(
     train_generator,
     epochs=epochs,
     validation_data=validation_generator
 )
 
 # 6. 保存模型
-model.save('pet_breed_model.h5')
-print("模型已保存为 backend/pet_breed_model.h5")
+model.save('my_custom_model.h5')
+print("模型已保存为 backend/my_custom_model.h5")
 
 # 绘制准确率曲线
 plt.plot(history.history['accuracy'], label='Training Accuracy')
