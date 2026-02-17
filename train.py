@@ -7,11 +7,16 @@ from tensorflow.keras.optimizers import Adam
 import os
 import matplotlib.pyplot as plt
 
+# --- 加入这两行 ---
+print("="*30)
+print("正在使用的设备:", "GPU" if tf.config.list_physical_devices('GPU') else "CPU")
+print("="*30)
+
 
 # 1. 设置参数
 img_width, img_height = 224, 224
 batch_size = 16
-epochs = 1
+epochs = 15
 
 # ！！！重要：改成你自己的数据集路径！！！
 # 使用 os.path.join 保证跨平台兼容性
@@ -31,12 +36,19 @@ train_datagen = ImageDataGenerator(
     validation_split=0.2   # 把20%的数据作为验证集
 )
 
+# 获取所有文件夹名
+all_folders = [d for d in os.listdir(train_dir) if os.path.isdir(os.path.join(train_dir, d))]
+# 核心：按字母表顺序排序，忽略大小写 (key=str.lower)
+my_sorted_classes = sorted(all_folders, key=str.lower)
+
+
 train_generator = train_datagen.flow_from_directory(
     train_dir,
     target_size=(img_width, img_height),
     batch_size=batch_size,
     class_mode='categorical',
-    subset='training'
+    subset='training',
+    classes=my_sorted_classes
 )
 
 # 1. 获取类别字典，例如 {'cat': 0, 'dog': 1}
@@ -46,24 +58,27 @@ indices_dict = train_generator.class_indices
 # 结果类似: ['cat', 'dog']
 class_names = list(indices_dict.keys())
 
-print(f"✅ 检测到类别映射: {indices_dict}")
-print(f"✅ 正在保存类别索引到 class_indices.txt...")
+print(f" 检测到类别映射: {indices_dict}")
+print(f" 正在保存类别索引到 class_indices.txt...")
 
+'''
 # 3. 写入文件
 with open('class_indices.txt', 'w') as f:
     f.write(str(class_names))
+'''
 
 validation_generator = train_datagen.flow_from_directory(
     train_dir,
     target_size=(img_width, img_height),
     batch_size=batch_size,
     class_mode='categorical',
-    subset='validation'
+    subset='validation',
+    classes=my_sorted_classes
 )
 
 # 打印类别索引，非常重要
 print("类别索引:", train_generator.class_indices)
-# Keras 会按文件夹名的字母顺序排序，例如: {'golden_retriever': 0, 'husky': 1}
+# Keras 会按文件夹名的字母顺序排序
 
 # 3. 构建模型（迁移学习）
 base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(img_width, img_height, 3))
