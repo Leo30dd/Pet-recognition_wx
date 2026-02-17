@@ -1,0 +1,190 @@
+/* pages/index/index.wxss */
+
+/* 1. 全局背景 */
+page {
+  background-color: #f6f8fa;
+}
+
+/* 2. 主容器 */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 30rpx;
+  box-sizing: border-box;
+}
+
+/* 3. 头部文字 */
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #888;
+}
+
+/* 4. 图片上传区域 */
+.uploader-wrapper {
+  width: 100%;
+  height: 500rpx;
+  background-color: #fff;
+  border-radius: 24rpx;
+  border: 4rpx dashed #dcdfe6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.uploader-wrapper:active {
+  border-color: #409eff;
+  background-color: #f9f9f9;
+}
+
+.uploader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.uploader-icon {
+  width: 100rpx;
+  height: 100rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+.uploader-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 5. 按钮区域 */
+.button-area {
+  width: 100%;
+  margin-top: 40rpx;
+  height: 100rpx;
+}
+
+button {
+  width: 100% !important;
+  border-radius: 50rpx;
+  background: linear-gradient(90deg, #007aff, #0056b3);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 6rpx 16rpx rgba(0, 122, 255, 0.3);
+}
+
+/* 6. 结果展示卡片 */
+.result-card {
+  width: 100%;
+  margin-top: 40rpx;
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  box-sizing: border-box;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.5s ease;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f2f5;
+  margin-bottom: 20rpx;
+}
+
+.result-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 15rpx;
+}
+
+.result-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  font-size: 30rpx;
+}
+
+.result-label {
+  color: #606266;
+}
+
+.result-value.breed {
+  font-weight: bold;
+  color: #409eff;
+  font-size: 34rpx;
+}
+
+/* 进度条样式 */
+.confidence-bar {
+  width: 300rpx;
+  height: 40rpx;
+  background-color: #ebeef5;
+  border-radius: 20rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.confidence-progress {
+  height: 100%;
+  background-color: #67c23a;
+  border-radius: 20rpx;
+  transition: width 1s ease; /* 增加动画效果 */
+}
+
+.confidence-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  line-height: 40rpx;
+  text-align: center;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+  text-shadow: 1rpx 1rpx 2rpx rgba(0,0,0,0.3);
+}
+
+/* 错误提示 */
+.error-tip {
+  margin-top: 30rpx;
+  color: #ff4d4f;
+  font-size: 26rpx;
+  background-color: #fff2f0;
+  padding: 16rpx 24rpx;
+  border-radius: 10rpx;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}

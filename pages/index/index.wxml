@@ -1,0 +1,67 @@
+<!-- pages/index/index.wxml -->
+<view class="container">
+
+<!-- 1. 头部区域 -->
+<view class="header">
+  <view class="title">智能宠物品种识别</view>
+  <view class="subtitle">上传一张照片，即可识别其品种</view>
+</view>
+  
+<!-- 2. 图片上传与预览区域 -->
+<view class="uploader-wrapper" bindtap="chooseImage">
+  <!-- 情况A: 有图片 -->
+  <image wx:if="{{imageSrc}}" class="preview-image" src="{{imageSrc}}" mode="aspectFill"></image>
+  
+  <!-- 情况B: 无图片 (显示占位符) -->
+  <view wx:else class="uploader-placeholder">
+    <!-- 注意：请确保 miniprogram/images/ 目录下有 camera-icon.png -->
+    <image class="uploader-icon" src="../img/camera.svg"></image>
+    <text class="uploader-text">点击上传照片</text>
+  </view>
+</view>
+
+<!-- 3. 操作按钮区域 -->
+<view class="button-area">
+  <button 
+    wx:if="{{imageSrc}}" 
+    type="primary" 
+    bindtap="startRecognize" 
+    loading="{{isLoading}}"
+  >
+    {{isLoading ? '识别中...' : '开始识别'}}
+  </button>
+</view>
+
+<!-- 4. 结果展示区域 -->
+<view wx:if="{{result}}" class="result-card">
+  <view class="result-header">
+    <!-- 注意：请确保 miniprogram/images/ 目录下有 paw-icon.png -->
+    <image class="result-icon" src="../img/paw.svg"></image>
+    <text class="result-title">识别结果</text>
+  </view>
+  
+  <view class="result-body">
+    <!-- 品种 -->
+    <view class="result-item">
+      <text class="result-label">预测品种</text>
+      <text class="result-value breed">{{result.breed}}</text>
+    </view>
+    
+    <!-- 置信度 (带进度条效果) -->
+    <view class="result-item">
+      <text class="result-label">置信度</text>
+      <view class="confidence-bar">
+        <!-- 动态设置宽度 -->
+        <view class="confidence-progress" style="width: {{result.confidence}}%;"></view>
+        <text class="confidence-text">{{result.confidence}}%</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 5. 错误提示区域 -->
+<view wx:if="{{errorMsg}}" class="error-tip">
+  <text>{{errorMsg}}</text>
+</view>
+
+</view>
