@@ -1,40 +1,114 @@
+# 文件名: backend/app.py
+import os
+import ast  # 用于安全地把字符串转换成列表
+import numpy as np
 from flask import Flask, request, jsonify
-from flask_cors import CORS    # 允许跨域请求
-import time
+from flask_cors import CORS
+from PIL import Image
+import tensorflow as tf
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.preprocessing.image import img_to_array
+from deep_translator import GoogleTranslator  # 导入翻译库
 
+# --- 初始化配置 ---
 app = Flask(__name__)
-CORS(app)                     # 初始化跨域
+CORS(app)
 
-@app.route("/")
-def home():
-    return "Hello 嘉嘉"
+# 1. 模型路径
+MODEL_PATH = 'my_custom_model.h5'  # 确保这是你训练好的模型文件名
 
-@app.route("/predict", methods =['POST'])
+# 2. 自动读取类别名称 (替代手动定义)
+CLASS_INDICES_PATH = 'class_indices.txt'
+CLASS_NAMES = []
+
+
+def load_resources():
+    """加载模型和类别文件"""
+    global model, CLASS_NAMES
+
+    # 加载类别名称
+    if os.path.exists(CLASS_INDICES_PATH):
+        with open(CLASS_INDICES_PATH, 'r') as f:
+            # ast.literal_eval 能把字符串 "['a', 'b']" 安全地变成列表 ['a', 'b']
+            CLASS_NAMES = ast.literal_eval(f.read())
+        print(f"已加载类别列表: {CLASS_NAMES}")
+    else:
+        print("错误：找不到 class_indices.txt！请先运行 train.py。")
+
+    # 加载模型
+    print(f"正在加载模型 {MODEL_PATH} ...")
+    try:
+        model = tf.keras.models.load_model(MODEL_PATH)
+        print("模型加载成功！")
+    except Exception as e:
+        print(f"模型加载失败: {e}")
+
+
+# 启动时加载资源
+load_resources()
+
+
+def process_image(image):
+    """图片预处理"""
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    image = image.resize((224, 224))
+    img_array = img_to_array(image)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = preprocess_input(img_array)  # 归一化
+    return img_array
+
+
+@app.route("/predict", methods=["POST"])
 def predict():
-    print("接收到请求......")   # 在控制台打印日志
-    # 判断有无文件
     if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400  # 返回错误响应
-    # 获取文件对象
-    file = request.files.get('file')
-    # 空文件检查
+        return jsonify({"error": "未接收到文件"}), 400
+    file = request.files['file']
     if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400  # 返回错误响应
-    # 读取文件内容
-    if file:     # 确保文件存在
-        print(f"成功接受文件：{file.filename}")
-        # 模拟耗时
-        time.sleep(2)
+        return jsonify({"error": "文件名为空"}), 400
 
-        # 模拟返回预测结果
-        fake_result = {
-            "filename": file.filename,
-            "prediction": "cat",   # 假设预测结果为“cat”
-            "confidence": 0.95     # 假设置信度为95%
-        }
+    if model is None or not CLASS_NAMES:
+        return jsonify({"error": "服务端资源未就绪"}), 500
 
-        return jsonify(fake_result), 200   # 返回成功响应
+    try:
+        image = Image.open(file.stream)
+        processed_image = process_image(image)
+
+        # 预测
+        predictions = model.predict(processed_image)
+
+        # 获取概率最大的索引
+        predicted_index = np.argmax(predictions[0])
+
+        # 从自动加载的列表中获取英文名
+        predicted_label_en = CLASS_NAMES[predicted_index]
+        confidence = float(predictions[0][predicted_index])
+
+        # 自动翻译部分
+        breed_cn = predicted_label_en  # 默认显示英文
+        try:
+            # 去掉下划线，例如 'golden_retriever' -> 'golden retriever'
+            text_to_translate = predicted_label_en.replace('_', ' ')
+
+            # 调用翻译 API
+            translator = GoogleTranslator(source='en', target='zh-CN')
+            breed_cn = translator.translate(text_to_translate)
+
+            print(f"翻译: {predicted_label_en} -> {breed_cn}")
+        except Exception as trans_e:
+            print(f"翻译服务暂时不可用: {trans_e}")
+            # 翻译失败时，可以做一个简单的备用映射，或者直接返回英文
+            # breed_cn = predicted_label_en
+
+        return jsonify({
+            "breed": breed_cn,
+            "confidence": round(confidence * 100, 2)
+        })
+
+    except Exception as e:
+        print(f"预测出错: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)
