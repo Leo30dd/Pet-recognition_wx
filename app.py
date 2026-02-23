@@ -6,21 +6,56 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from PIL import Image
 import tensorflow as tf
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input  # MobileNetV2 专用预处理函数
 from tensorflow.keras.preprocessing.image import img_to_array
-from deep_translator import GoogleTranslator  # 导入翻译库
+
 
 # --- 初始化配置 ---
 app = Flask(__name__)
 CORS(app)
 
 # 1. 模型路径
-MODEL_PATH = 'my_custom_model.h5'  # 确保这是你训练好的模型文件名
+MODEL_PATH = 'pet_resnet_model.h5'  # 确保这是你训练好的模型文件名
 
 # 2. 自动读取类别名称 (替代手动定义)
 CLASS_INDICES_PATH = 'class_indices.txt'
 CLASS_NAMES = []
 
+# 英汉对照字典
+PET_NAMES_MAP = {
+    # --- 猫类 ---
+    'american shorthair': '美国短毛猫',
+    'bengal': '孟加拉豹猫',
+    'bombay': '孟买猫',
+    'british_shorthair': '英国短毛猫',
+    'maine_coon': '缅因猫',
+    'ragdoll': '布偶猫',
+    'scottish fold': '苏格兰折耳猫',
+    'siamese': '暹罗猫',
+    'sphynx': '斯芬克斯无毛猫',
+
+    # --- 狗类 ---
+    'beagle': '比格犬',
+    'border_collie': '边境牧羊犬',
+    'chihuahua': '吉娃娃',
+    'chinese_rural_dog': '中华田园犬',
+    'chow': '松狮',
+    'collie': '柯利牧羊犬',
+    'doberman': '杜宾犬',
+    'french_bulldog': '法国斗牛犬',
+    'german_shepherd': '德国牧羊犬',
+    'golden_retriever': '金毛寻回犬',
+    'husky': '哈士奇',
+    'labrador_retriever': '拉布拉多',
+    'malamute': '阿拉斯加雪橇犬',
+    'pembroke': '柯基犬 (彭布罗克)',
+    'pomeranian': '博美犬',
+    'poodle': '贵宾犬',
+    'pug': '巴哥犬',
+    'samoyed': '萨摩耶',
+    'shiba_dog': '柴犬',
+    'teddy': '泰迪犬'
+}
 
 def load_resources():
     """加载模型和类别文件"""
@@ -33,7 +68,7 @@ def load_resources():
             CLASS_NAMES = ast.literal_eval(f.read())
         print(f"已加载类别列表: {CLASS_NAMES}")
     else:
-        print("错误：找不到 class_indices.txt！请先运行 train.py。")
+        print("错误：找不到 class_indices.txt！请先运行 train（92+85）.py。")
 
     # 加载模型
     print(f"正在加载模型 {MODEL_PATH} ...")
@@ -61,52 +96,53 @@ def process_image(image):
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    # 1. 基础校验
     if 'file' not in request.files:
         return jsonify({"error": "未接收到文件"}), 400
     file = request.files['file']
     if file.filename == '':
         return jsonify({"error": "文件名为空"}), 400
 
+    # 确保模型和类别列表已加载
     if model is None or not CLASS_NAMES:
-        return jsonify({"error": "服务端资源未就绪"}), 500
+        return jsonify({"error": "服务端资源未就绪，请检查服务器日志"}), 500
 
     try:
+        # 2. 图片处理
         image = Image.open(file.stream)
         processed_image = process_image(image)
 
-        # 预测
+        # 3. 模型预测
         predictions = model.predict(processed_image)
 
         # 获取概率最大的索引
         predicted_index = np.argmax(predictions[0])
 
-        # 从自动加载的列表中获取英文名
+        # 获取原始英文名 (例如: 'American Shorthair' 或 'husky')
         predicted_label_en = CLASS_NAMES[predicted_index]
+
+        # 获取置信度
         confidence = float(predictions[0][predicted_index])
 
-        # 自动翻译部分
-        breed_cn = predicted_label_en  # 默认显示英文
-        try:
-            # 去掉下划线，例如 'golden_retriever' -> 'golden retriever'
-            text_to_translate = predicted_label_en.replace('_', ' ')
+        # ================= 核心修改：查字典翻译 =================
+        # 1. 把名字统一转成小写 (例如: 'American Shorthair' -> 'american shorthair')
+        #    这样就能匹配我们在字典里写的小写 Key 了
+        lookup_key = predicted_label_en.lower()
 
-            # 调用翻译 API
-            translator = GoogleTranslator(source='en', target='zh-CN')
-            breed_cn = translator.translate(text_to_translate)
+        # 2. 查字典，如果查不到，就默认显示原英文名
+        breed_cn = PET_NAMES_MAP.get(lookup_key, predicted_label_en)
 
-            print(f"翻译: {predicted_label_en} -> {breed_cn}")
-        except Exception as trans_e:
-            print(f"翻译服务暂时不可用: {trans_e}")
-            # 翻译失败时，可以做一个简单的备用映射，或者直接返回英文
-            # breed_cn = predicted_label_en
+        print(f" 识别: {predicted_label_en} ->  翻译: {breed_cn} (置信度: {confidence:.2f})")
+        # ========================================================
 
+        # 4. 返回结果
         return jsonify({
             "breed": breed_cn,
             "confidence": round(confidence * 100, 2)
         })
 
     except Exception as e:
-        print(f"预测出错: {e}")
+        print(f" 预测出错: {e}")
         return jsonify({"error": str(e)}), 500
 
 
