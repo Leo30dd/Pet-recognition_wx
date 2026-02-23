@@ -37,7 +37,7 @@ Page({
     // 【注意】请务必确保这里的 IP 地址是你电脑的局域网 IP
     // 如果你在本机模拟器调试，也可以尝试用 'http://127.0.0.1:5000/predict'
     // 如果用真机调试，必须用局域网 IP (如 192.168.x.x)
-    const uploadUrl = 'http://192.168.1.10:5000/predict'; 
+    const uploadUrl = 'http://127.0.0.1:5000/predict'; 
 
     wx.uploadFile({
       url: uploadUrl,
