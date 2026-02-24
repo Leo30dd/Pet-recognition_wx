@@ -16,3 +16,9 @@ page { background-color: #f6f8fa; padding-bottom: 40rpx; }
 }
 .card-title { font-size: 32rpx; font-weight: bold; margin-bottom: 20rpx; border-left: 8rpx solid #007aff; padding-left: 20rpx; }
 .card-content { font-size: 28rpx; color: #666; line-height: 1.6; text-align: justify; }
+
+.title-icon {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 12rpx;
+}

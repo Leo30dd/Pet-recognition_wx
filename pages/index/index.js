@@ -33,7 +33,7 @@ goToAbout() {
   })
 },
 
-// 跳转到历史页面 (如果你还没加)
+// 跳转到历史页面 
 goToHistory() {
   wx.navigateTo({
     url: '/pages/history/history',
@@ -48,10 +48,10 @@ goToHistory() {
 
     this.setData({ isLoading: true, errorMsg: '', result: null });
 
-    // 【注意】请务必确保这里的 IP 地址是你电脑的局域网 IP
-    // 如果你在本机模拟器调试，也可以尝试用 'http://127.0.0.1:5000/predict'
+    // 【注意】这里的 IP 地址是电脑的局域网 IP
+    // 如果在本机模拟器调试，可以尝试用 'http://127.0.0.1:5000/predict'
     // 如果用真机调试，必须用局域网 IP (如 192.168.x.x)
-    const uploadUrl = 'http://127.0.0.1:5000/predict'; 
+    const uploadUrl = 'http://198.18.0.1:5000/predict'; 
 
     wx.uploadFile({
       url: uploadUrl,

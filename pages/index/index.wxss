@@ -14,13 +14,13 @@ page {
   box-sizing: border-box;
 }
 
-/* 顶部导航栏样式 */
 .navbar {
   width: 100%;
   display: flex;
-  justify-content: space-between;
-  padding: 0 10rpx;
-  margin-bottom: 20rpx;
+  justify-content: flex-end; /* 把按钮推到最右边 */
+  padding: 10rpx 20rpx;
+  margin-bottom: 30rpx;
+  box-sizing: border-box;
 }
 
 .nav-right {
@@ -29,17 +29,25 @@ page {
 
 .nav-item {
   background-color: #fff;
-  padding: 10rpx 24rpx;
-  border-radius: 30rpx;
-  font-size: 24rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 40rpx; /* 让按钮看起来更圆润 */
+  font-size: 26rpx;
   color: #555;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.06); /* 淡淡的阴影 */
   display: flex;
-  align-items: center;
+  align-items: center; /* 确保图标和文字垂直居中 */
+  justify-content: center;
 }
 
 .nav-item:active {
-  background-color: #f0f0f0;
+  background-color: #f0f0f0; /* 点击时的反馈效果 */
+}
+
+/* 强制限制 SVG 图标的大小 */
+.nav-icon-img {
+  width: 32rpx !important;  /* 强制宽 */
+  height: 32rpx !important; /* 强制高 */
+  margin-right: 8rpx;       /* 图标和文字中间留点空隙 */
 }
 
 .history-btn {
