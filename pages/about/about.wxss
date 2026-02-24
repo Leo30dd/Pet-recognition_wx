@@ -1,0 +1,109 @@
+/* pages/about/about.wxss */
+/* 全局背景 */
+page {
+  background-color: #f6f8fa;
+  padding-bottom: 40rpx;
+}
+
+.container {
+  padding: 30rpx;
+}
+
+/* 1. 头部 Logo 区 */
+.header-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 40rpx 0 60rpx;
+}
+
+.logo {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background-color: #fff;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+  margin-bottom: 20rpx;
+}
+
+.app-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.version {
+  font-size: 24rpx;
+  color: #999;
+  background-color: #e6e6e6;
+  padding: 4rpx 12rpx;
+  border-radius: 10rpx;
+}
+
+/* 通用卡片样式 */
+.card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.02);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+  border-left: 8rpx solid #007aff; /* 蓝色竖条装饰 */
+}
+
+.card-content {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+/* 技术标签云 */
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tag {
+  font-size: 24rpx;
+  color: #007aff;
+  background-color: #eef6ff;
+  padding: 10rpx 20rpx;
+  border-radius: 30rpx;
+  border: 1rpx solid rgba(0, 122, 255, 0.2);
+}
+
+/* 作者信息行 */
+.info-row {
+  display: flex;
+  margin-bottom: 15rpx;
+  font-size: 28rpx;
+}
+
+.info-row .label {
+  color: #888;
+  width: 100rpx;
+  flex-shrink: 0;
+}
+
+.info-row .value {
+  color: #333;
+}
+
+/* 底部版权 */
+.footer {
+  text-align: center;
+  font-size: 22rpx;
+  color: #ccc;
+  margin-top: 40rpx;
+}

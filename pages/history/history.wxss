@@ -1,0 +1,63 @@
+/* pages/history/history.wxss */
+page { background-color: #f6f8fa; }
+.container { padding: 30rpx; }
+.page-title { font-size: 36rpx; font-weight: bold; margin-bottom: 30rpx; color: #333; }
+
+.empty-tip { text-align: center; color: #999; margin-top: 100rpx; font-size: 28rpx; }
+
+.history-item {
+  display: flex;
+  background-color: #fff;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+  position: relative; /* 为了定位删除按钮 */
+  align-items: center;
+}
+
+.history-img {
+  width: 120rpx; height: 120rpx; border-radius: 10rpx; margin-right: 20rpx;
+  background-color: #eee;
+}
+
+.history-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.history-breed { font-size: 32rpx; font-weight: bold; color: #333; }
+.history-conf { font-size: 26rpx; color: #07c160; }
+.history-time { font-size: 24rpx; color: #999; }
+
+.clear-btn { margin-top: 40rpx; background-color: #fff; color: #ff4d4f; font-size: 28rpx; }
+
+/* 删除按钮样式 */
+.delete-btn {
+  position: absolute;
+  right: 20rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50rpx;
+  height: 50rpx;
+  background-color: #f5f5f5;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+  font-size: 24rpx;
+}
+.delete-btn:active {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.clear-all-btn {
+  margin-top: 40rpx;
+  background-color: #fff;
+  color: #666;
+  font-size: 28rpx;
+  border: 1rpx solid #eee;
+}

@@ -1,0 +1,18 @@
+/* pages/detail/detail.wxss */
+page { background-color: #f6f8fa; padding-bottom: 40rpx; }
+.header {
+  background-color: #fff; padding: 40rpx; text-align: center; margin-bottom: 30rpx;
+}
+.breed-name { font-size: 48rpx; font-weight: bold; color: #333; margin-bottom: 20rpx; }
+.tags { display: flex; justify-content: center; gap: 15rpx; }
+.tag {
+  font-size: 24rpx; color: #007aff; background-color: #e6f0ff;
+  padding: 6rpx 16rpx; border-radius: 20rpx;
+}
+.card {
+  background-color: #fff; width: 690rpx; margin: 0 auto 30rpx;
+  border-radius: 20rpx; padding: 30rpx; box-sizing: border-box;
+  box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.05);
+}
+.card-title { font-size: 32rpx; font-weight: bold; margin-bottom: 20rpx; border-left: 8rpx solid #007aff; padding-left: 20rpx; }
+.card-content { font-size: 28rpx; color: #666; line-height: 1.6; text-align: justify; }

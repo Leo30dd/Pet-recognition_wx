@@ -14,6 +14,43 @@ page {
   box-sizing: border-box;
 }
 
+/* 顶部导航栏样式 */
+.navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.nav-right {
+  display: flex;
+}
+
+.nav-item {
+  background-color: #fff;
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  color: #555;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+}
+
+.nav-item:active {
+  background-color: #f0f0f0;
+}
+
+.history-btn {
+  background-color: #fff;
+  padding: 10rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #666;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
 /* 3. 头部文字 */
 .header {
   text-align: center;

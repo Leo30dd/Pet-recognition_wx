@@ -1,0 +1,30 @@
+<!--pages/history/history.wxml-->
+<view class="container">
+  <view class="page-title">识别历史</view>
+
+  <view wx:if="{{historyList.length === 0}}" class="empty-tip">
+    暂无历史记录，快去识别萌宠吧！
+  </view>
+
+  <block wx:else>
+    <view class="history-item" wx:for="{{historyList}}" wx:key="id" bindtap="goToDetail" data-breed="{{item.breed}}">
+      <!-- 图片 -->
+      <image class="history-img" src="{{item.imageSrc}}" mode="aspectFill"></image>
+      
+      <!-- 信息 -->
+      <view class="history-info">
+        <view class="history-breed">{{item.breed}}</view>
+        <view class="history-conf">置信度: {{item.confidence}}%</view>
+        <view class="history-time">{{item.time}}</view>
+      </view>
+
+      <!-- 删除按钮 (阻止冒泡 catchtap，防止触发跳转) -->
+      <view class="delete-btn" catchtap="deleteItem" data-id="{{item.id}}">
+        <text>✕</text>
+      </view>
+    </view>
+    
+    <!-- 清空全部按钮 -->
+    <button class="clear-all-btn" bindtap="clearHistory">清空所有历史</button>
+  </block>
+</view>

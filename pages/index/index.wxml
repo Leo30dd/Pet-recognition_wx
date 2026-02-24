@@ -1,4 +1,21 @@
 <!-- pages/index/index.wxml -->
+
+<!-- 顶部导航栏 -->
+<view class="navbar">
+  <!-- 左边留空或者放其他 -->
+  <view class="nav-left"></view>
+  
+  <!-- 右边放功能按钮 -->
+  <view class="nav-right">
+    <view class="nav-item" bindtap="goToHistory">
+      <text>🕒 历史</text>
+    </view>
+    <view class="nav-item" bindtap="goToAbout" style="margin-left: 20rpx;">
+      <text>ℹ️ 关于</text>
+    </view>
+  </view>
+</view>
+
 <view class="container">
 
 <!-- 1. 头部区域 -->
@@ -33,7 +50,7 @@
 </view>
 
 <!-- 4. 结果展示区域 -->
-<view wx:if="{{result}}" class="result-card">
+<view wx:if="{{result}}" class="result-card" bindtap="goToDetail">
   <view class="result-header">
     <!-- 注意：请确保 miniprogram/images/ 目录下有 paw-icon.png -->
     <image class="result-icon" src="../img/paw.svg"></image>
@@ -57,7 +74,15 @@
       </view>
     </view>
   </view>
+  <view style="text-align: center; font-size: 22rpx; color: #999; margin-top: 20rpx;">
+     点击查看 {{result.breed}} 百科详情 >
+   </view>
 </view>
+
+<!-- 只有有结果时才显示分享按钮 -->
+<button wx:if="{{result}}" open-type="share" style="margin-top: 20rpx; background-color: #07c160; color: white; border-radius: 50rpx;">
+  分享给朋友
+</button>
 
 <!-- 5. 错误提示区域 -->
 <view wx:if="{{errorMsg}}" class="error-tip">

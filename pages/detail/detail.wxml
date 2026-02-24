@@ -1,0 +1,22 @@
+<!--pages/detail/detail.wxml-->
+<view class="container">
+  <!-- 顶部大标题 -->
+  <view class="header">
+    <view class="breed-name">{{breedName}}</view>
+    <view class="tags">
+      <text class="tag" wx:for="{{info.tags}}" wx:key="*this">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 介绍卡片 -->
+  <view class="card">
+    <view class="card-title">🐶 品种介绍</view>
+    <view class="card-content">{{info.intro}}</view>
+  </view>
+
+  <!-- 饲养建议卡片 -->
+  <view class="card">
+    <view class="card-title">💡 饲养建议</view>
+    <view class="card-content">{{info.care}}</view>
+  </view>
+</view>
