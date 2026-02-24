@@ -10,12 +10,12 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input  # Mobil
 from tensorflow.keras.preprocessing.image import img_to_array
 
 
-# --- 初始化配置 ---
+#  初始化配置
 app = Flask(__name__)
 CORS(app)
 
 # 1. 模型路径
-MODEL_PATH = 'pet_resnet_model.h5'  # 确保这是你训练好的模型文件名
+MODEL_PATH = 'pet_mobilenet_model_dog.h5'  # 确保这是你训练好的模型文件名
 
 # 2. 自动读取类别名称 (替代手动定义)
 CLASS_INDICES_PATH = 'class_indices.txt'
@@ -23,22 +23,9 @@ CLASS_NAMES = []
 
 # 英汉对照字典
 PET_NAMES_MAP = {
-    # --- 猫类 ---
-    'american shorthair': '美国短毛猫',
-    'bengal': '孟加拉豹猫',
-    'bombay': '孟买猫',
-    'british_shorthair': '英国短毛猫',
-    'maine_coon': '缅因猫',
-    'ragdoll': '布偶猫',
-    'scottish fold': '苏格兰折耳猫',
-    'siamese': '暹罗猫',
-    'sphynx': '斯芬克斯无毛猫',
-
-    # --- 狗类 ---
     'beagle': '比格犬',
     'border_collie': '边境牧羊犬',
     'chihuahua': '吉娃娃',
-    'chinese_rural_dog': '中华田园犬',
     'chow': '松狮',
     'collie': '柯利牧羊犬',
     'doberman': '杜宾犬',
@@ -48,13 +35,12 @@ PET_NAMES_MAP = {
     'husky': '哈士奇',
     'labrador_retriever': '拉布拉多',
     'malamute': '阿拉斯加雪橇犬',
-    'pembroke': '柯基犬 (彭布罗克)',
+    'pembroke': '柯基犬',
     'pomeranian': '博美犬',
-    'poodle': '贵宾犬',
+    'poodle': '贵宾犬',            # 泰迪也是贵宾的一种
     'pug': '巴哥犬',
     'samoyed': '萨摩耶',
-    'shiba_dog': '柴犬',
-    'teddy': '泰迪犬'
+    'shiba_dog': '柴犬'
 }
 
 def load_resources():
@@ -68,7 +54,7 @@ def load_resources():
             CLASS_NAMES = ast.literal_eval(f.read())
         print(f"已加载类别列表: {CLASS_NAMES}")
     else:
-        print("错误：找不到 class_indices.txt！请先运行 train（92+85）.py。")
+        print("错误：找不到 class_indices.txt！请先运行 train.py。")
 
     # 加载模型
     print(f"正在加载模型 {MODEL_PATH} ...")
@@ -124,7 +110,17 @@ def predict():
         # 获取置信度
         confidence = float(predictions[0][predicted_index])
 
-        # ================= 核心修改：查字典翻译 =================
+        CONFIDENCE_THRESHOLD = 0.70  # 推荐 0.7
+
+        if confidence < CONFIDENCE_THRESHOLD:
+            print(f"非狗类别，置信度过低: {confidence:.2f}")
+
+            return jsonify({
+                "breed": "未识别为狗",
+                "confidence": round(confidence * 100, 2)
+            })
+
+        # 查字典翻译
         # 1. 把名字统一转成小写 (例如: 'American Shorthair' -> 'american shorthair')
         #    这样就能匹配我们在字典里写的小写 Key 了
         lookup_key = predicted_label_en.lower()
@@ -133,7 +129,6 @@ def predict():
         breed_cn = PET_NAMES_MAP.get(lookup_key, predicted_label_en)
 
         print(f" 识别: {predicted_label_en} ->  翻译: {breed_cn} (置信度: {confidence:.2f})")
-        # ========================================================
 
         # 4. 返回结果
         return jsonify({
