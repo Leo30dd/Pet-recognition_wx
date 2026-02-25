@@ -29,7 +29,14 @@ page { background-color: #f6f8fa; }
 
 .history-breed { font-size: 32rpx; font-weight: bold; color: #333; }
 .history-conf { font-size: 26rpx; color: #07c160; }
-.history-time { font-size: 24rpx; color: #999; }
+.history-item {
+  position: relative; /* 关键：给父元素定位基准 */
+  display: flex;
+  background-color: #fff;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
 
 .clear-btn { margin-top: 40rpx; background-color: #fff; color: #ff4d4f; font-size: 28rpx; }
 
@@ -39,15 +46,13 @@ page { background-color: #f6f8fa; }
   right: 20rpx;
   top: 50%;
   transform: translateY(-50%);
-  width: 50rpx;
-  height: 50rpx;
-  background-color: #f5f5f5;
-  border-radius: 50%;
+  width: 60rpx;
+  height: 60rpx;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #999;
-  font-size: 24rpx;
+  color: #ccc;
+  font-weight: bold;
 }
 .delete-btn:active {
   background-color: #ff4d4f;

@@ -1,19 +1,17 @@
 // app.js
 App({
-  onLaunch() {
-    // 展示本地存储能力
-    const logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
-
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
-  },
   globalData: {
-    userInfo: null
+    baseUrl: 'http://192.168.1.32:5000', 
+    userId: null
+  },
+
+  onLaunch() {
+    // 模拟设备指纹：生成并本地存储一个唯一ID，替代登录注册流程
+    let storedId = wx.getStorageSync('device_uuid');
+    if (!storedId) {
+      storedId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+      wx.setStorageSync('device_uuid', storedId);
+    }
+    this.globalData.userId = storedId;
   }
 })
