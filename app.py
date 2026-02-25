@@ -1,145 +1,192 @@
-# 文件名: backend/app.py
 import os
-import ast  # 用于安全地把字符串转换成列表
+import ast
+import uuid
+import logging
+from datetime import datetime
 import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+import pymysql
 from PIL import Image
 import tensorflow as tf
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input  # MobileNetV2 专用预处理函数
+from tensorflow.keras.applications.resnet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 
+# 兼容性设置
+pymysql.install_as_MySQLdb()
 
-#  初始化配置
 app = Flask(__name__)
 CORS(app)
 
-# 1. 模型路径
-MODEL_PATH = 'pet_mobilenet_model_dog.h5'  # 确保这是你训练好的模型文件名
+#  数据库配置
+DB_PASSWORD = "zcl2004..."
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{DB_PASSWORD}@127.0.0.1:3306/pet_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JSON_AS_ASCII'] = False
 
-# 2. 自动读取类别名称 (替代手动定义)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+db = SQLAlchemy(app)
+
+
+#  数据模型
+class History(db.Model):
+    __tablename__ = 'history_records'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(64), index=True, nullable=False)
+    image_url = db.Column(db.String(255), nullable=False)
+    breed = db.Column(db.String(50), nullable=False)
+    confidence = db.Column(db.Float, nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now)
+
+    def to_dict(self, host_url):
+        return {
+            'id': self.id,
+            'breed': self.breed,
+            'confidence': f"{self.confidence:.1f}",
+            'image_url': host_url.rstrip('/') + self.image_url,
+            'time': self.create_time.strftime("%Y-%m-%d %H:%M")
+        }
+
+
+with app.app_context():
+    db.create_all()
+
+#  模型加载
+MODEL_PATH = 'pet_mobilenet_model_dog.h5'
 CLASS_INDICES_PATH = 'class_indices.txt'
 CLASS_NAMES = []
+model = None
 
-# 英汉对照字典
+# 你的 20 类字典
 PET_NAMES_MAP = {
-    'beagle': '比格犬',
-    'border_collie': '边境牧羊犬',
-    'chihuahua': '吉娃娃',
-    'chow': '松狮',
-    'collie': '柯利牧羊犬',
-    'doberman': '杜宾犬',
-    'french_bulldog': '法国斗牛犬',
-    'german_shepherd': '德国牧羊犬',
-    'golden_retriever': '金毛寻回犬',
-    'husky': '哈士奇',
-    'labrador_retriever': '拉布拉多',
-    'malamute': '阿拉斯加雪橇犬',
-    'pembroke': '柯基犬',
-    'pomeranian': '博美犬',
-    'poodle': '贵宾犬',            # 泰迪也是贵宾的一种
-    'pug': '巴哥犬',
-    'samoyed': '萨摩耶',
+    'beagle': '比格犬', 'border_collie': '边境牧羊犬', 'chihuahua': '吉娃娃',
+    'chow': '松狮', 'collie': '柯利牧羊犬',
+    'doberman': '杜宾犬', 'french_bulldog': '法国斗牛犬', 'german_shepherd': '德国牧羊犬',
+    'golden_retriever': '金毛寻回犬', 'husky': '哈士奇', 'labrador_retriever': '拉布拉多',
+    'malamute': '阿拉斯加雪橇犬', 'pembroke': '柯基犬', 'pomeranian': '博美犬',
+    'poodle': '贵宾犬', 'pug': '巴哥犬', 'samoyed': '萨摩耶',
     'shiba_dog': '柴犬'
 }
 
-def load_resources():
-    """加载模型和类别文件"""
+
+def init_resources():
     global model, CLASS_NAMES
-
-    # 加载类别名称
-    if os.path.exists(CLASS_INDICES_PATH):
-        with open(CLASS_INDICES_PATH, 'r') as f:
-            # ast.literal_eval 能把字符串 "['a', 'b']" 安全地变成列表 ['a', 'b']
-            CLASS_NAMES = ast.literal_eval(f.read())
-        print(f"已加载类别列表: {CLASS_NAMES}")
-    else:
-        print("错误：找不到 class_indices.txt！请先运行 train.py。")
-
-    # 加载模型
-    print(f"正在加载模型 {MODEL_PATH} ...")
     try:
-        model = tf.keras.models.load_model(MODEL_PATH)
-        print("模型加载成功！")
+        if os.path.exists(CLASS_INDICES_PATH):
+            with open(CLASS_INDICES_PATH, 'r', encoding='utf-8') as f:
+                CLASS_NAMES = ast.literal_eval(f.read())
+        if os.path.exists(MODEL_PATH):
+            model = tf.keras.models.load_model(MODEL_PATH)
+            print(" 模型加载成功")
     except Exception as e:
-        print(f"模型加载失败: {e}")
+        print(f" 资源加载失败: {e}")
 
 
-# 启动时加载资源
-load_resources()
+init_resources()
 
 
-def process_image(image):
-    """图片预处理"""
-    if image.mode != "RGB":
-        image = image.convert("RGB")
-    image = image.resize((224, 224))
-    img_array = img_to_array(image)
+def preprocess_image(image_path):
+    img = Image.open(image_path)
+    if img.mode != "RGB": img = img.convert("RGB")
+    img = img.resize((224, 224))
+    img_array = img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)  # 归一化
-    return img_array
+    return preprocess_input(img_array)
 
 
+# 核心接口
 @app.route("/predict", methods=["POST"])
 def predict():
-    # 1. 基础校验
-    if 'file' not in request.files:
-        return jsonify({"error": "未接收到文件"}), 400
+    if 'file' not in request.files: return jsonify({"code": 400, "msg": "No file"}), 400
     file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "文件名为空"}), 400
-
-    # 确保模型和类别列表已加载
-    if model is None or not CLASS_NAMES:
-        return jsonify({"error": "服务端资源未就绪，请检查服务器日志"}), 500
+    user_id = request.form.get('user_id', 'anonymous')
+    if file.filename == '': return jsonify({"code": 400, "msg": "Empty filename"}), 400
 
     try:
-        # 2. 图片处理
-        image = Image.open(file.stream)
-        processed_image = process_image(image)
+        # 1. 保存图片
+        ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
+        unique_filename = f"{uuid.uuid4().hex}.{ext}"
+        save_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+        file.save(save_path)
 
-        # 3. 模型预测
-        predictions = model.predict(processed_image)
+        # 2. 预测
+        processed_img = preprocess_image(save_path)
+        predictions = model.predict(processed_img)
+        top_idx = np.argmax(predictions[0])
+        label_en = CLASS_NAMES[top_idx]
+        confidence = float(predictions[0][top_idx])
 
-        # 获取概率最大的索引
-        predicted_index = np.argmax(predictions[0])
-
-        # 获取原始英文名 (例如: 'American Shorthair' 或 'husky')
-        predicted_label_en = CLASS_NAMES[predicted_index]
-
-        # 获取置信度
-        confidence = float(predictions[0][predicted_index])
-
-        CONFIDENCE_THRESHOLD = 0.70  # 推荐 0.7
+        # 阈值判断
+        CONFIDENCE_THRESHOLD = 0.70
 
         if confidence < CONFIDENCE_THRESHOLD:
-            print(f"非狗类别，置信度过低: {confidence:.2f}")
+            breed_cn = "未识别为狗"
+        else:
+            breed_cn = PET_NAMES_MAP.get(label_en.lower(), label_en)
 
-            return jsonify({
-                "breed": "未识别为狗",
-                "confidence": round(confidence * 100, 2)
-            })
+        # 3. 存入数据库
+        web_path = f"/static/uploads/{unique_filename}"
+        record = History(
+            user_id=user_id, image_url=web_path, breed=breed_cn,
+            confidence=round(confidence * 100, 2)
+        )
+        db.session.add(record)
+        db.session.commit()
 
-        # 查字典翻译
-        # 1. 把名字统一转成小写 (例如: 'American Shorthair' -> 'american shorthair')
-        #    这样就能匹配我们在字典里写的小写 Key 了
-        lookup_key = predicted_label_en.lower()
-
-        # 2. 查字典，如果查不到，就默认显示原英文名
-        breed_cn = PET_NAMES_MAP.get(lookup_key, predicted_label_en)
-
-        print(f" 识别: {predicted_label_en} ->  翻译: {breed_cn} (置信度: {confidence:.2f})")
-
-        # 4. 返回结果
         return jsonify({
-            "breed": breed_cn,
-            "confidence": round(confidence * 100, 2)
+            "code": 200,
+            "data": {
+                "breed": breed_cn,
+                "confidence": round(confidence * 100, 2),
+                "image_url": web_path
+            }
         })
 
     except Exception as e:
-        print(f" 预测出错: {e}")
-        return jsonify({"error": str(e)}), 500
+        print(f"Error: {e}")
+        return jsonify({"code": 500, "msg": str(e)}), 500
+
+
+@app.route("/history", methods=["GET"])
+def get_history_list():
+    user_id = request.args.get('user_id')
+    records = History.query.filter_by(user_id=user_id).order_by(History.create_time.desc()).all()
+    host_url = request.host_url
+    # 统一返回 image_url 字段
+    data = [r.to_dict(host_url) for r in records]
+    return jsonify({"code": 200, "data": data})
+
+
+@app.route("/delete_history", methods=["POST"])
+def delete_history():
+    # 删除单条记录接口
+    try:
+        data = request.get_json()
+        record_id = data.get('id')
+        record = History.query.get(record_id)
+        if record:
+            db.session.delete(record)
+            db.session.commit()
+            return jsonify({"code": 200, "msg": "已删除"})
+        return jsonify({"code": 404, "msg": "记录不存在"})
+    except Exception as e:
+        return jsonify({"code": 500, "msg": str(e)})
+
+
+@app.route("/history/clear", methods=["POST"])
+def clear_history():
+    # 清空所有接口
+    data = request.get_json()
+    user_id = data.get('user_id')
+    History.query.filter_by(user_id=user_id).delete()
+    db.session.commit()
+    return jsonify({"code": 200, "msg": "已清空"})
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=True)
