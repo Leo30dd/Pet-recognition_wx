@@ -3,7 +3,7 @@
   <!-- 1. Logo 与 版本信息 -->
   <view class="header-section">
     <image class="logo" src="/pages/img/paw.svg" mode="aspectFit"></image>
-    <view class="app-name">智能狗狗识别助手</view>
+    <view class="app-name">智能宠物识别助手</view>
     <view class="version">Version 1.0.0 </view>
   </view>
 
@@ -14,8 +14,8 @@
       <text>项目简介</text>
     </view>
     <view class="card-content">
-      本项目是一款基于深度学习技术的犬类图像分类小程序。为了解决实际场景中的细粒度分类难题，本项目针对国内最常见的狗狗品种进行了深度优化。
-      用户只需上传或拍摄狗狗照片，系统即可通过后端部署的高精度 AI 模型快速识别品种，并联动本地百科数据库，提供详细的饲养建议。
+      本项目是一款基于深度学习技术的宠物图像分类小程序。为了解决实际场景中的细粒度分类难题，本项目针对国内最常见的猫狗品种进行了深度优化。
+      用户只需上传或拍摄猫狗照片，系统即可通过后端部署的高精度 AI 模型快速识别品种，并联动本地百科数据库，提供详细的饲养建议。
     </view>
   </view>
 

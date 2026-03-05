@@ -1,7 +1,9 @@
 // app.js
 App({
   globalData: {
-    baseUrl: 'http://192.168.1.32:5000', 
+    // 本地使用http://127.0.0.1:5000
+    // 真机查询ip地址
+    baseUrl: 'http://127.0.0.1:5000', 
     userId: null
   },
 

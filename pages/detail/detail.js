@@ -1,7 +1,7 @@
 // pages/detail/detail.js
 
 //  专属犬类百科数据库
-// 注意：这里的键名（Key）必须和后端 app.py 翻译出来的中文名一模一样！
+// 键名（Key）必须和后端 app.py 翻译出来的中文名一样
 const breedDatabase = {
   '比格犬': {
     tags: ['大耳朵', '史努比原型', '嗅觉天才'],
@@ -118,10 +118,10 @@ Page({
       name = name.split('(')[0].trim();
     }
 
-    // 1. 尝试直接精确匹配
+    // 1. 直接精确匹配
     let info = breedDatabase[name];
     
-    // 2. 尝试模糊匹配 (比如传过来的是"贵宾犬/泰迪"，可以在这里拆分匹配)
+    // 2. 模糊匹配 (比如传过来的是"贵宾犬/泰迪"，可以在这里拆分匹配)
     if (!info) {
       for (const key in breedDatabase) {
         if (name.includes(key) || key.includes(name)) {
@@ -132,7 +132,7 @@ Page({
       }
     }
 
-    // 3. 终极兜底逻辑 (万一后端识别出了字典里没写的狗)
+    // 3. 后端识别出了字典里没写的狗
     if (!info) {
       info = {
         tags: ['萌宠', '人类的好朋友'],

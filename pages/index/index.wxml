@@ -17,8 +17,8 @@
   </view>
 
   <view class="header">
-    <view class="title">智能狗狗品种识别</view>
-    <view class="subtitle">支持金毛、哈士奇等20种常见狗狗</view>
+    <view class="title">智能宠物品种识别</view>
+    <view class="subtitle">支持金毛、哈士奇、英短、布偶猫等20种常见猫狗</view>
   </view>
     
   <!-- 图片上传与预览区域 -->
