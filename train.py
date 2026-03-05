@@ -3,7 +3,7 @@
 项目名称：基于 MobileNetV2 的宠物品种（犬类）识别模型训练脚本
 ==============================================================================
 
-【系统数据流向说明】
+
 1. 输入：
    读取 224x224 的彩色宠物图片（包含 R, G, B 三个通道）。
 2. 预处理：
@@ -19,7 +19,7 @@
    训练完成后生成 pet_mobilenet_model_dog.h5 模型，并自动保存类别索引到 class_indices.txt。
    后端 API 依靠此索引将预测的数字标签映射为英文品种，再查字典翻译为中文返回给小程序。
 
-【核心优化策略】
+核心优化策略:
 - 强力数据增强 (Data Augmentation)：应对小样本学习，抑制过拟合。
 - 动态学习率衰减 (ReduceLROnPlateau)：遇到精度瓶颈时自动降低学习率。
 - 早停机制 (EarlyStopping)：防止无效训练，自动保存最佳权重。
@@ -28,7 +28,7 @@
 
 
 import os
-# 1. 硬件设置 (尝试调用 GPU，失败则回退 CPU)
+# 1. 硬件设置
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # 屏蔽一些无关紧要的日志
 cuda_bin_path = r'E:\Anaconda3\envs\grad_project\Library\bin'
 if os.path.exists(cuda_bin_path):
@@ -37,7 +37,6 @@ if os.path.exists(cuda_bin_path):
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
-# 【关键】导入 MobileNetV2 专用的预处理函数
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from tensorflow.keras.models import Model
@@ -56,18 +55,16 @@ if gpus:
     except RuntimeError as e:
         print(e)
 else:
-    print("⚠未发现 GPU，将使用 CPU 训练 (速度较慢，请耐心等待)")
+    print("未发现 GPU，将使用 CPU 训练")
 
 
 # 2. 参数设置
 img_width, img_height = 224, 224
-# MobileNet 比较小，CPU 也能跑得动 32，如果内存不够就改 16
 batch_size = 8
 epochs = 30
 
 # 路径修复：使用绝对路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# 假设你的文件夹叫 dataset/train (或者 train1，请根据实际情况修改)
 train_dir = os.path.abspath(os.path.join(current_dir, '..', 'dataset', 'train1'))
 print(f"数据集绝对路径: {train_dir}")
 
@@ -116,7 +113,7 @@ with open('class_indices.txt', 'w', encoding='utf-8') as f:
 # 4. 构建模型 (MobileNetV2 - 冻结底座)
 base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(img_width, img_height, 3))
 
-# 【核心】冻结底座，只训练我们新加的头部，极大降低显存占用和训练时间
+# 冻结底座，只训练我们新加的头部
 base_model.trainable = False
 
 x = base_model.output
@@ -135,7 +132,7 @@ model.compile(optimizer=Adam(learning_rate=0.001),
 
 # 早停：如果验证集 5 轮不涨，就停
 early_stop = EarlyStopping(monitor='val_accuracy', patience=5, restore_best_weights=True)
-# 学习率衰减：如果 3 轮不涨，学习率减半 (帮助突破瓶颈)
+# 学习率衰减：如果 3 轮不涨，学习率减半
 reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=3, verbose=1)
 
 print("\n开始训练 MobileNetV2")

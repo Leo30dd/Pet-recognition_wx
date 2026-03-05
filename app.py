@@ -1,7 +1,6 @@
 import os
 import ast
 import uuid
-import logging
 from datetime import datetime
 import numpy as np
 from flask import Flask, request, jsonify
@@ -10,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 import pymysql
 from PIL import Image
 import tensorflow as tf
-from tensorflow.keras.applications.resnet_v2 import preprocess_input
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 
 # 兼容性设置
@@ -62,11 +61,10 @@ CLASS_INDICES_PATH = 'class_indices.txt'
 CLASS_NAMES = []
 model = None
 
-# 你的 20 类字典
+# 字典
 PET_NAMES_MAP = {
     'beagle': '比格犬', 'border_collie': '边境牧羊犬', 'chihuahua': '吉娃娃',
-    'chow': '松狮', 'collie': '柯利牧羊犬',
-    'doberman': '杜宾犬', 'french_bulldog': '法国斗牛犬', 'german_shepherd': '德国牧羊犬',
+    'chow': '松狮', 'collie': '柯利牧羊犬','doberman': '杜宾犬', 'french_bulldog': '法国斗牛犬', 'german_shepherd': '德国牧羊犬',
     'golden_retriever': '金毛寻回犬', 'husky': '哈士奇', 'labrador_retriever': '拉布拉多',
     'malamute': '阿拉斯加雪橇犬', 'pembroke': '柯基犬', 'pomeranian': '博美犬',
     'poodle': '贵宾犬', 'pug': '巴哥犬', 'samoyed': '萨摩耶',
